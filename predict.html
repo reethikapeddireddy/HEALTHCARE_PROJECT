@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Behavior Analysis | Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for Consistency */
+        :root {
+            --primary-bg: #1a2a35; /* Deep Blue/Gray */
+            --secondary-bg: #253949; /* Darker Blue/Gray (Card/Section Background) */
+            --accent-color: #00bfff; /* Deep Sky Blue/Light Blue (Single Core Color) */
+            --danger-color: #d32f2f; /* Dark Red (Emergency) */
+            --text-color: #e0f7fa; /* Very Light Blue/White */
+            --font-main: 'Montserrat', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+            --shadow-dark: 0 5px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Base Styles */
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            text-align: center;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header and Navigation */
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+            color: var(--accent-color);
+            letter-spacing: 1.2px;
+        }
+
+        /* Go Back Button (Color-Filled) */
+        .nav-home {
+            display: inline-block;
+            margin-bottom: 30px;
+            padding: 8px 15px;
+            background: var(--accent-color); /* Color-filled background */
+            border: 1px solid var(--accent-color);
+            color: var(--primary-bg); /* Dark text for contrast */
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 3px 10px rgba(0, 191, 255, 0.4);
+        }
+
+        .nav-home:hover {
+            background: #0099cc; /* Darker blue on hover */
+            color: var(--text-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+        
+        /* Centered Main Content Container */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        /* Input Box & Output Box General Styling */
+        .box {
+            background: var(--secondary-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-dark);
+            border-top: 3px solid var(--accent-color);
+            text-align: left;
+            width: 90%;
+            max-width: 500px;
+            margin-bottom: 30px;
+        }
+        
+        /* --- File Upload Styling --- */
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            display: block;
+            margin: 20px 0;
+            padding: 25px 20px;
+            width: calc(100% - 40px);
+            cursor: pointer;
+            background: var(--primary-bg);
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .custom-file-upload:hover {
+            background: #152530;
+            border-color: #0099cc;
+            color: #0099cc;
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+        }
+        
+        .file-name-display {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #8899aa;
+            font-family: var(--font-mono);
+        }
+
+        button {
+            padding: 12px 35px;
+            background: var(--accent-color);
+            border: none;
+            color: var(--primary-bg);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #0099cc;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        /* Output Box specific styles */
+        #result {
+            display: none;
+            max-width: 600px;
+        }
+
+        .output-box h2 {
+            font-family: var(--font-main);
+            color: var(--accent-color);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .output-box p {
+            font-size: 1rem;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .output-box b {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* Status Styling */
+        .output-box.critical-box {
+            border: 4px solid var(--danger-color);
+        }
+
+        .output-box.safe-box {
+            border: 4px solid var(--accent-color);
+        }
+        
+        /* Flashing Animation for Critical Status */
+        .flash-red {
+            animation: critical-flash 0.8s infinite alternate;
+        }
+        @keyframes critical-flash {
+            from { background-color: var(--primary-bg); box-shadow: 0 0 20px rgba(211, 47, 47, 0.5); }
+            to { background-color: #3e1b1b; box-shadow: 0 0 25px var(--danger-color); }
+        }
+
+        /* Audio Player Styling */
+        #alertAudio {
+            width: 100%;
+            margin-top: 15px;
+            background: #334a60; 
+            border-radius: 6px;
+            padding: 8px;
+            border: 1px solid var(--accent-color);
+        }
+
+        #msg {
+            font-weight: 500;
+            font-style: italic;
+            color: #ffda6a; /* Keep a distinct, non-blue color for message */
+            font-size: 0.95rem;
+            text-align: right;
+        }
+        
+        #beh {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            text-align: right;
+        }
+        
+    </style>
+</head>
+<body>
+
+<h1>AI Patient Behavior Detection Panel</h1>
+<a class="nav-home" href="/">← Go Back to Home Dashboard</a>
+
+<div class="main-content">
+    
+    <div class="box upload-box">
+        <h2 style="text-align: center;">Upload Video for Analysis</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="video" id="video" accept="video/*" required>
+            
+            <label for="video" class="custom-file-upload">
+                <p style="margin: 0; font-weight: 600;">Click to Select Video</p>
+                <span class="file-name-display" id="file-display">Max size 200MB (recommended)</span>
+            </label>
+            
+            <button type="submit">Start Detection</button>
+        </form>
+    </div>
+
+    <div class="box output-box" id="result">
+        <h2><span id="status-icon"></span> Analysis Report</h2>
+        
+        <p><b>Video File:</b> <span id="vname" style="text-align: right;">-</span></p>
+        <p><b>Detected Behavior:</b> <span id="beh" style="text-align: right;">-</span></p>
+        <p><b>System Message:</b> <span id="msg" style="text-align: right;">-</span></p>
+
+        <h3 style="font-size: 1.2rem; color: var(--accent-color); margin-top: 25px; text-align: center;">Emergency Audio Alert</h3>
+        <audio id="alertAudio" controls></audio>
+    </div>
+
+</div>
+
+<script>
+// Update the file name display when a file is chosen
+document.getElementById("video").onchange = function() {
+    const fileInput = this;
+    const fileNameDisplay = document.getElementById("file-display");
+    if (fileInput.files.length > 0) {
+        fileNameDisplay.innerText = fileInput.files[0].name;
+        fileNameDisplay.style.color = 'var(--accent-color)';
+    } else {
+        fileNameDisplay.innerText = "Max size 200MB (recommended)";
+        fileNameDisplay.style.color = '#8899aa';
+    }
+};
+
+document.getElementById("uploadForm").onsubmit = async function(e) {
+    e.preventDefault();
+
+    let formData = new FormData();
+    const videoFile = document.getElementById("video").files[0];
+    if (!videoFile) {
+        alert("Please select a video file first.");
+        return;
+    }
+    formData.append("video", videoFile);
+
+    let response;
+    try {
+        // Fetch call to your Flask backend
+        response = await fetch("/upload", {
+            method: "POST",
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Server returned status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Upload failed:", error);
+        alert("Video upload failed. Check the server connection or CORS settings.");
+        return;
+    }
+
+    let data = await response.json();
+
+    let box = document.getElementById("result");
+    let behSpan = document.getElementById("beh");
+    box.style.display = "block";
+    box.classList.remove("critical-box", "safe-box");
+
+    document.getElementById("vname").innerText = data.video_name || "N/A";
+    behSpan.innerText = data.behaviors || "N/A";
+    document.getElementById("msg").innerText = data.voice_message || "Processing complete.";
+
+    let audio = document.getElementById("alertAudio");
+    audio.src = data.audio_url; 
+    
+    // Attempt to play audio
+    setTimeout(() => {
+        audio.play().catch(error => {
+            console.warn("Audio playback error (Autoplay blocked):", error);
+        });
+    }, 500); 
+
+    const criticalKeywords = ["fall", "attack", "seizure", "distress"];
+    const isCritical = criticalKeywords.some(w => data.behaviors.toLowerCase().includes(w));
+
+    const statusIcon = document.getElementById("status-icon");
+
+    // Dynamic styling based on detection result
+    if (isCritical) {
+        document.body.classList.add("flash-red");
+        box.classList.add("critical-box");
+        behSpan.style.color = 'var(--danger-color)';
+        statusIcon.innerHTML = "CRITICAL ALERT | ";
+    } else {
+        document.body.classList.remove("flash-red");
+        box.classList.add("safe-box");
+        behSpan.style.color = 'var(--accent-color)';
+        statusIcon.innerHTML = "NORMAL/SAFE | ";
+    }
+};
+</script>
+
+</body>
+</html>
